@@ -55,8 +55,11 @@ typedef enum{
 
 MENU_STATE menu = INITIALIZATION;
 
+// ---Lógica para navegação dos menus principais ---
 void get_new_state(PRESSED_BUTTON button){
   switch (menu) {
+
+// --- Para selecionar PLA ---
   case MODE_SELECT_PLA:
      if(button == BOTAO_DOWN){
       menu = MODE_SELECT_PETG;
@@ -82,6 +85,7 @@ void get_new_state(PRESSED_BUTTON button){
     }
     break;
 
+// --- Para selecionar PETG ---
   case MODE_SELECT_PETG:
     if(button == BOTAO_DOWN){
       menu = MODE_SELECT_ABS;
@@ -101,6 +105,7 @@ void get_new_state(PRESSED_BUTTON button){
     }
     break;
 
+// --- Para selecionar ABS ---
   case MODE_SELECT_ABS:
     if(button == BOTAO_DOWN){
       menu = MODE_SELECT_TPU;
@@ -114,6 +119,7 @@ void get_new_state(PRESSED_BUTTON button){
     }
     break;
 
+// --- Para selecionar TPU ---
     case MODE_SELECT_TPU:
      if(button == BOTAO_DOWN){
       menu = MODE_SELECT_PLA;
@@ -127,22 +133,62 @@ void get_new_state(PRESSED_BUTTON button){
     }
     break;
 
-    case MODE_CANCEL_PLA:
-     if(button == BOTAO_DOWN){
+// --- Lógia para sair do submenu PLA ---
+    case MODE_PLA:
+     if(button == BOTAO_DOWN || button == BOTAO_UP || button == BOTAO_VOLTAR){
       menu = MODE_CANCEL_PLA;
     
-    } else if(button == BOTAO_UP){
-      menu = MODE_CANCEL_PLA;
-
-    }
-    else{
-      menu = MODE_SELECT_PLA;
     }
     break;
+
+    case MODE_CANCEL_PLA:
+     if(button == BOTAO_SELECIONAR){
+      menu = MODE_SELECT_PLA;}
+         break;
+
+// --- Lógia para sair do submenu PETG ---
+    case MODE_PETG:
+     if(button == BOTAO_DOWN || button == BOTAO_UP || button == BOTAO_VOLTAR){
+      menu = MODE_CANCEL_PETG;
+    
+    }
+    break;
+
+    case MODE_CANCEL_PETG:
+     if(button == BOTAO_SELECIONAR){
+      menu = MODE_SELECT_PETG;}
+          break;
+
+// --- Lógia para sair do submenu ABS ---
+    case MODE_ABS:
+     if(button == BOTAO_DOWN || button == BOTAO_UP || button == BOTAO_VOLTAR){
+      menu = MODE_CANCEL_ABS;
+    
+    }
+    break;
+
+    case MODE_CANCEL_ABS:
+     if(button == BOTAO_SELECIONAR){
+      menu = MODE_SELECT_ABS;}
+          break;
+
+ // --- Lógia para sair do submenu TPU ---
+    case MODE_TPU:
+     if(button == BOTAO_DOWN || button == BOTAO_UP || button == BOTAO_VOLTAR){
+      menu = MODE_CANCEL_TPU;
+    
+    }
+    break;
+
+    case MODE_CANCEL_TPU:
+     if(button == BOTAO_SELECIONAR){
+      menu = MODE_SELECT_TPU;}
+          break;
 
   }
 }
 
+// --- Inicialização ---
 void updateMenu() {
 
   switch (menu) {
@@ -157,6 +203,7 @@ void updateMenu() {
     lcd.print("      FILAMENTO     ");
     break;
 
+// --- Tela para selecionar PLA
   case MODE_SELECT_PLA:
     lcd.setCursor(0,0);
     lcd.print("      FILAMENTO     ");
@@ -166,8 +213,10 @@ void updateMenu() {
     lcd.print(">PLA            ABS ");
     lcd.setCursor(0, 3);
     lcd.print(" PETG           TPU ");
+    digitalWrite(RELE_AUTO, LOW);
     break;
 
+// --- Tela para selecionar PETG
   case MODE_SELECT_PETG:
     lcd.setCursor(0,0);
     lcd.print("      FILAMENTO     ");
@@ -179,6 +228,7 @@ void updateMenu() {
     lcd.print(">PETG           TPU ");
     break;
 
+// --- Tela para selecionar ABS
   case MODE_SELECT_ABS:
     lcd.setCursor(0,0);
     lcd.print("      FILAMENTO     ");
@@ -190,6 +240,7 @@ void updateMenu() {
     lcd.print(" PETG           TPU ");
     break;
 
+// --- Tela para selecionar TPU
   case MODE_SELECT_TPU:
     lcd.setCursor(0,0);
     lcd.print("      FILAMENTO     ");
@@ -201,8 +252,8 @@ void updateMenu() {
     lcd.print(" PETG          >TPU ");
     break;
 
+// --- Tela secagem filamento PLA
   case MODE_PLA:
-
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO  PLA   ");
     lcd.setCursor(0, 1);
@@ -220,10 +271,11 @@ void updateMenu() {
     lcd.print("HH:MM:SS");
     lcd.setCursor(0, 3);
     lcd.print("              Cancel");
+    digitalWrite(RELE_AUTO, HIGH);
     break;
 
+// --- Tela cancelar secagem filamento PLA
   case MODE_CANCEL_PLA:
-
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO  PLA   ");
     lcd.setCursor(0, 1);
@@ -242,9 +294,9 @@ void updateMenu() {
     lcd.setCursor(0, 3);
     lcd.print("             >Cancel");
     break;
-    
+
+// --- Tela secagem filamento PETG  
   case MODE_PETG:
-
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO PETG   ");
     lcd.setCursor(0, 1);
@@ -264,8 +316,8 @@ void updateMenu() {
     lcd.print("              Cancel");
     break;
 
+// --- Tela cancelar secagem filamento PETG
   case MODE_CANCEL_PETG:
-
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO PETG   ");
     lcd.setCursor(0, 1);
@@ -285,8 +337,8 @@ void updateMenu() {
     lcd.print("             >Cancel");
     break;
 
+// --- Tela secagem filamento ABS
   case MODE_ABS:
-
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO  ABS   ");
     lcd.setCursor(0, 1);
@@ -306,8 +358,8 @@ void updateMenu() {
     lcd.print("              Cancel");
     break;
 
+// --- Tela cancelar secagem filamento ABS
   case MODE_CANCEL_ABS:
-
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO  ABS   ");
     lcd.setCursor(0, 1);
@@ -327,8 +379,8 @@ void updateMenu() {
     lcd.print("             >Cancel");
     break;
 
+// --- Tela secagem filamento TPU
   case MODE_TPU:
-
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO  TPU   ");
     lcd.setCursor(0, 1);
@@ -348,8 +400,8 @@ void updateMenu() {
     lcd.print("              Cancel");
     break;
 
+// --- Tela cancelar secagem filamento TPU
   case MODE_CANCEL_TPU:
-
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO  TPU   ");
     lcd.setCursor(0, 1);
