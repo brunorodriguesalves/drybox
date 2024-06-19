@@ -10,6 +10,7 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
+uint32_t millis_leitura_sensores = 0;
 uint32_t timer = 0;
 
  /* deixei aqui as funções do sensor apenas para verificar onde devem ficar para cada modelo de filamento
@@ -399,12 +400,6 @@ void updateMenu() {
 // ----------------------------------
 // --- Tela secagem filamento PLA ---
   case MODE_PLA:
-
-  //  if(millis() - timer>= 2000)  {
-   h = dht.readHumidity();
-   t = dht.readTemperature();
-//   timer = millis(); // Atualiza a referência
-//  }
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO  PLA   ");
     lcd.setCursor(0, 1);
@@ -710,6 +705,12 @@ void setup() {
 }
 
 void loop() {
+
+  if(millis() - millis_leitura_sensores > 2000){
+    h = dht.readHumidity();
+    t = dht.readTemperature();
+    millis_leitura_sensores = millis();
+  }
 
   if (!digitalRead(botaoVoltar)){
     get_new_state(BOTAO_VOLTAR);
