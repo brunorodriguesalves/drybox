@@ -8,17 +8,15 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 #define DHTPIN 12
 #define DHTTYPE DHT11
+#define e 2.718281828459045235360287471352
 DHT dht(DHTPIN, DHTTYPE);
 
 uint32_t millis_leitura_sensores = 0;
 uint32_t timer = 0;
 
- /* deixei aqui as funções do sensor apenas para verificar onde devem ficar para cada modelo de filamento
- e seria necessário atualizar a cada 2 segundos mais ou menos
- */
-
 float h;
 float t;
+float calculaUmidadeAbsoluta(void);
 
 #define RELE_AUTO 13
 #define RELE_A 9
@@ -709,7 +707,9 @@ void loop() {
   if(millis() - millis_leitura_sensores > 2000){
     h = dht.readHumidity();
     t = dht.readTemperature();
+    h = calculaUmidadeAbsoluta();
     millis_leitura_sensores = millis();
+    updateMenu();
   }
 
   if (!digitalRead(botaoVoltar)){
@@ -737,4 +737,11 @@ void loop() {
     while (!digitalRead(botaoSelecionar));
   }
 
+}
+
+// --- 
+float calculaUmidadeAbsoluta(void)
+{
+  float UA = ((6.112 * (pow(e, ((17.67 * t) / (t + 243.5)))) *  h * 2.1674) / (273.15 + t));
+  return UA;
 }
