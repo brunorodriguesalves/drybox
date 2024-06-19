@@ -1,14 +1,10 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include <RotaryEncoder.h>
 #include <DHT.h>
 #include <DHT_U.h>
 
-// ----------------------------
-// --- Instanciando Objetos ---
 LiquidCrystal_I2C lcd(0x27, 20, 4);
-RotaryEncoder encoder(pinDT, pinCLK);
 
 #define DHTPIN 12
 #define DHTTYPE DHT11
@@ -20,49 +16,12 @@ uint32_t timer = 0;
  e seria necessário atualizar a cada 2 segundos mais ou menos
  */
 float h = dht.readHumidity();
-float t = dht.readTemperature();
+ float t = dht.readTemperature();
 
-
-// -----------------------------
-// --- Declaração de Funções ---
-bool botaoApertado(byte pin_sw, int tempoDebounce = 100);
-void configuraInterrupcao();
-void atualizaDisplay();
-
-
-// --------------------------------------
-// --- Definição do Encoder ---
-#define pinSW 10 // BOTAO DO ENCODER
-#define pinDT 9
-#define pinCLK 8
-
-#define pinR 13 // PINO LED VERMELHO
-#define pinG 1 // PINO LED VERDE
-#define pinB 11 // PINO LED AZUL
-
-// DEFINIÇÕES
-#define menuMin 0 // VALOR MÍNIMO DE NAVEGAÇÃO DO MENU
-#define menuMax 4 // VALOR MÁXIMO DE NAVEGAÇÃO DO MENU
-
-
-// -----------------------------------
-// --- Definição dos pinos de saída---
-// #define RELE_AUTO 13
-// #define RELE_A 9
+#define RELE_AUTO 13
+#define RELE_A 9
 int STATUS_RELE_A = 0;
 
-
-// DECLARAÇÃO DE VARIÁVEIS
-int menu = 0;
-long posicao = 0, posicaoAnt = 0;
-
-unsigned long tempoDisplay;
-bool girouEncoder = true;
-
-byte Leds[3] = {pinR, pinG, pinB}; // ARRAY DAS PORTAS DOS LEDS
-
-
-// --- Definição dos pinos dos botões ---
 int botaoUp = 2;
 int botaoDown = 3;
 int botaoVoltar = 4;
@@ -128,16 +87,12 @@ void get_new_state(PRESSED_BUTTON button){
 
     } else if(button == BOTAO_UP){
       menu = MODE_SELECT_ABS; 
-    
-    } else if (girouEncoder) {
-      menu = MODE_SELECT_PETG;
+    }
 
-    }  girouEncoder = false;
     else{
       menu = MODE_INICIAR_PLA;
     }
     break;
-    posicaoAnt = posicao; //SALVA A POSIÇÃO ATUAL DO ENCODER PARA COMPARAR
 
 // ----------------------------------------
 // --- Lógica para selecionar MENU PETG ---
@@ -371,56 +326,8 @@ void get_new_state(PRESSED_BUTTON button){
          break;
 
   }
-
 }
 
-
-// -----------------------------
-// --- Implementando Funções ---
-bool botaoApertado(byte pin_sw, int tempoDebounce = 100) {
-  static unsigned long swDebounce;
-  bool sw;
-  static bool swAnt = 1;
-
-  sw  = digitalRead(pin_sw);
-
-  if ( millis() - swDebounce  > tempoDebounce) {
-
-    if (!sw && swAnt) {
-      swDebounce = millis();
-      swAnt = sw;
-      return true;
-
-    } else if (sw && !swAnt) {
-      swDebounce = millis();
-      swAnt = sw;
-    }
-  }
-
-  return false;
-}
-
-void configuraInterrupcao() {
-
-  PCICR |= (1 << PCIE2); // HABILITA A INTERRUPÇÃO DAS PORTAS 0 A 7
-  PCMSK2 |= (1 << PCINT22) | (1 << PCINT23); // CONFIGURA AS PORTAS 6 E 7 PARA INTERRUPÇÃO
-
-}
-
-void atualizaDisplay() {
-
-  if (botaoApertado(pinSW) || (posicao != posicaoAnt) ) {
-    lcd.backlight();
-    tempoDisplay = millis();
-  }
-
-  if (millis() - tempoDisplay > 5000) lcd.noBacklight();
-
-}
-
-ISR(PCINT2_vect) { // FUNÇÃO DA INTERRUPÇÃO
-  encoder.tick();
-}
 
 // ---------------------
 // --- Inicialização ---
@@ -780,7 +687,6 @@ void updateMenu() {
 }
 
 void setup() {
-  
   lcd.init();
   lcd.backlight();
   dht.begin();
@@ -789,22 +695,8 @@ void setup() {
   pinMode(botaoDown, INPUT_PULLUP);
   pinMode(botaoVoltar, INPUT_PULLUP);
   pinMode(botaoSelecionar, INPUT_PULLUP);
-  // pinMode(RELE_A, OUTPUT);
-  // pinMode(RELE_AUTO, OUTPUT);
-
-  Serial.begin(9600);
-
-  for (byte i = 0; i < 3; i++) {
-    pinMode(Leds[i], OUTPUT);
-    digitalWrite(Leds[i], LOW);
-  }
-
-  Serial.println("Iniciando Display");
-
-  configuraInterrupcao();
-  posicaoAnt = encoder.getPosition(); //SALVA A POSIÇÃO ATUAL DO ENCODER PARA COMPARAR
-  Serial.println("Fim Setup");
-  
+  pinMode(RELE_A, OUTPUT);
+  pinMode(RELE_AUTO, OUTPUT);
   delay(1000);
   menu = MODE_SELECT_PLA;
   updateMenu();
@@ -836,12 +728,4 @@ void loop() {
     delay(100);
     while (!digitalRead(botaoSelecionar));
   }
-
-  posicao = encoder.getPosition();
-  menu = constrain( (menu + (posicao - posicaoAnt) ), menuMin, menuMax);
-
-  if ( posicao != posicaoAnt) {
-    girouEncoder = true;
-  }
-
 }
