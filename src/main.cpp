@@ -15,8 +15,9 @@ uint32_t timer = 0;
  /* deixei aqui as funções do sensor apenas para verificar onde devem ficar para cada modelo de filamento
  e seria necessário atualizar a cada 2 segundos mais ou menos
  */
-float h = dht.readHumidity();
- float t = dht.readTemperature();
+
+float h;
+float t;
 
 #define RELE_AUTO 13
 #define RELE_A 9
@@ -332,8 +333,8 @@ void get_new_state(PRESSED_BUTTON button){
 // ---------------------
 // --- Inicialização ---
 void updateMenu() {
-
   switch (menu) {
+
   case INITIALIZATION:
     lcd.setCursor(0,0);
     lcd.print("      DRY  BOX      ");
@@ -398,6 +399,12 @@ void updateMenu() {
 // ----------------------------------
 // --- Tela secagem filamento PLA ---
   case MODE_PLA:
+
+  //  if(millis() - timer>= 2000)  {
+   h = dht.readHumidity();
+   t = dht.readTemperature();
+//   timer = millis(); // Atualiza a referência
+//  }
     lcd.setCursor(0,0);
     lcd.print("   FILAMENTO  PLA   ");
     lcd.setCursor(0, 1);
@@ -728,4 +735,5 @@ void loop() {
     delay(100);
     while (!digitalRead(botaoSelecionar));
   }
+
 }
