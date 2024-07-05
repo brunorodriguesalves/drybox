@@ -5,18 +5,31 @@
 #include <Wire.h>
 #include <math.h>
 
+#define TIMER_SECAGEM_PLA_S ((uint32_t)7200) // 2 horas
+#define DEBOUNCE_TIME_MS ((uint32_t)200)     // Debounce time in milliseconds
+
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 #define DHTPIN 12
 #define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
+uint32_t current_millis = 0;
 uint32_t millis_leitura_sensores = 0;
+uint32_t millis_countdown_timer = 0;
 uint32_t timer = 0;
 
 float h;
 float t;
+float prev_h;
+float prev_t;
 float calculaUmidadeAbsoluta(void);
+
+unsigned long lastDebounceTime[4] = {
+    0, 0, 0, 0}; // Array to store debounce time for each button
+void checkButtons();
+
+void clean_display();
 
 #define RELE_AUTO 13
 #define RELE_A 9
@@ -116,20 +129,17 @@ void get_new_state(PRESSED_BUTTON button) {
     // ------------------------------------
     // --- Lógica para menu INICIAR PLA ---
   case MODE_INICIAR_PLA:
-    if (button == BOTAO_DOWN) {
-      menu = MODE_CANCELAR_PLA;
-    } else if (button == BOTAO_UP || button == BOTAO_VOLTAR) {
+    if (button == BOTAO_DOWN || button == BOTAO_UP || button == BOTAO_VOLTAR) {
       menu = MODE_CANCELAR_PLA;
     } else {
+      timer = TIMER_SECAGEM_PLA_S;
       menu = MODE_PLA;
     }
     break;
 
     // --- Lógica para menu CANCELAR PLA ---
   case MODE_CANCELAR_PLA:
-    if (button == BOTAO_DOWN) {
-      menu = MODE_INICIAR_PLA;
-    } else if (button == BOTAO_UP || button == BOTAO_VOLTAR) {
+    if (button == BOTAO_DOWN || button == BOTAO_UP || button == BOTAO_VOLTAR) {
       menu = MODE_INICIAR_PLA;
     } else {
       menu = MODE_SELECT_PLA;
@@ -245,13 +255,9 @@ void get_new_state(PRESSED_BUTTON button) {
   case MODE_CANCELAR_TPU:
     if (button == BOTAO_DOWN) {
       menu = MODE_INICIAR_TPU;
-
     } else if (button == BOTAO_UP || button == BOTAO_VOLTAR) {
       menu = MODE_INICIAR_TPU;
-
-    }
-
-    else {
+    } else {
       menu = MODE_SELECT_TPU;
     }
     break;
@@ -268,7 +274,23 @@ void get_new_state(PRESSED_BUTTON button) {
       menu = MODE_SELECT_TPU;
     }
     break;
+
+  default:
+    clean_display();
+    menu = MODE_SELECT_PLA;
+    break;
   }
+}
+
+void clean_display() {
+  lcd.setCursor(0, 0);
+  lcd.print("                    ");
+  lcd.setCursor(0, 1);
+  lcd.print("                    ");
+  lcd.setCursor(0, 2);
+  lcd.print("                    ");
+  lcd.setCursor(0, 3);
+  lcd.print("                    ");
 }
 
 // ---------------------
@@ -353,7 +375,8 @@ void updateMenu() {
     lcd.print(h, 1);
     lcd.print("%     ");
     lcd.setCursor(0, 3);
-    lcd.print("tempo");
+    lcd.print("tempo ");
+    lcd.print(timer / 60);
     lcd.setCursor(13, 3);
     lcd.print("Cancel ");
     digitalWrite(RELE_AUTO, HIGH);
@@ -640,39 +663,51 @@ void setup() {
 }
 
 void loop() {
+  current_millis = millis();
+  bool update_menu_sensor = false;
+  bool update_menu_timer = false;
 
-  if (millis() - millis_leitura_sensores > 1000) {
+  // le os sensores a cada 2 segundos, se variou 0.1 deve atualizar o display
+  if (current_millis - millis_leitura_sensores > 2000) {
     h = dht.readHumidity();
     t = dht.readTemperature();
-    h = calculaUmidadeAbsoluta();
-    millis_leitura_sensores = millis();
-    updateMenu();
+    if (isnanf(h) || isnanf(t)) {
+      h = -1.0;
+      t = -1.0;
+    } else {
+      h = calculaUmidadeAbsoluta();
+    }
+    if (fabs(prev_h - h) >= 0.1f || fabs(prev_t - t) >= 0.1f) {
+      update_menu_sensor = true;
+    }
+    prev_h = h;
+    prev_t = t;
+    millis_leitura_sensores = current_millis;
+  }
+  if (current_millis < millis_countdown_timer) {
+    // aconteceu um overflow
+    millis_countdown_timer = current_millis;
+  }
+  if (timer > 0 && current_millis - millis_countdown_timer > 1000) {
+    // adiciona os estados aqui para os outros materiais
+    if (menu == MODE_PLA) {
+      timer--;
+      if (timer == 0) {
+        // acabou o tempo de secagem
+        // TODO coloca os outputs esperados aqui bruno
+        menu = MODE_SELECT_PLA;
+      }
+      update_menu_timer = true;
+    } else {
+      timer = 0;
+    }
+    millis_countdown_timer = current_millis;
   }
 
-  if (!digitalRead(botaoVoltar)) {
-    get_new_state(BOTAO_VOLTAR);
+  checkButtons();
+  if (update_menu_sensor || update_menu_timer) {
+    // esta atualizacao eh para manter os valores do display se atualizando
     updateMenu();
-    delay(100);
-    while (!digitalRead(botaoVoltar))
-      ;
-  } else if (!digitalRead(botaoUp)) {
-    get_new_state(BOTAO_UP);
-    updateMenu();
-    delay(100);
-    while (!digitalRead(botaoUp))
-      ;
-  } else if (!digitalRead(botaoDown)) {
-    get_new_state(BOTAO_DOWN);
-    updateMenu();
-    delay(100);
-    while (!digitalRead(botaoDown))
-      ;
-  } else if (!digitalRead(botaoSelecionar)) {
-    get_new_state(BOTAO_SELECIONAR);
-    updateMenu();
-    delay(100);
-    while (!digitalRead(botaoSelecionar))
-      ;
   }
 }
 
@@ -681,4 +716,37 @@ float calculaUmidadeAbsoluta(void) {
   float UA = ((6.112 * (pow(M_E, ((17.67 * t) / (t + 243.5)))) * h * 2.1674) /
               (273.15 + t));
   return UA;
+}
+
+void checkButtons() {
+  bool upState = !digitalRead(botaoUp);
+  bool downState = !digitalRead(botaoDown);
+  bool voltarState = !digitalRead(botaoVoltar);
+  bool selecionarState = !digitalRead(botaoSelecionar);
+
+  if ((upState || downState || voltarState || selecionarState)) {
+    if (upState &&
+        (current_millis - lastDebounceTime[BOTAO_UP]) > DEBOUNCE_TIME_MS) {
+      get_new_state(BOTAO_UP);
+      updateMenu();
+      lastDebounceTime[BOTAO_UP] = current_millis;
+    } else if (downState && (current_millis - lastDebounceTime[BOTAO_DOWN]) >
+                                DEBOUNCE_TIME_MS) {
+      get_new_state(BOTAO_DOWN);
+      updateMenu();
+      lastDebounceTime[BOTAO_DOWN] = current_millis;
+    } else if (voltarState &&
+               (current_millis - lastDebounceTime[BOTAO_VOLTAR]) >
+                   DEBOUNCE_TIME_MS) {
+      get_new_state(BOTAO_VOLTAR);
+      updateMenu();
+      lastDebounceTime[BOTAO_VOLTAR] = current_millis;
+    } else if (selecionarState &&
+               (current_millis - lastDebounceTime[BOTAO_SELECIONAR]) >
+                   DEBOUNCE_TIME_MS) {
+      get_new_state(BOTAO_SELECIONAR);
+      updateMenu();
+      lastDebounceTime[BOTAO_SELECIONAR] = current_millis;
+    }
+  }
 }
