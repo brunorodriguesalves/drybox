@@ -5,7 +5,10 @@
 #include <Wire.h>
 #include <math.h>
 
-#define TIMER_SECAGEM_PLA_S ((uint32_t)7200) // 2 horas
+#define TIMER_SECAGEM_PLA_S ((uint32_t)14400) // 4 horas
+#define TIMER_SECAGEM_PETG_S ((uint32_t)7200) // 2 horas
+#define TIMER_SECAGEM_ABS_S ((uint32_t)7200) // 2 horas
+#define TIMER_SECAGEM_TPU_S ((uint32_t)14400) // 4 horas
 #define DEBOUNCE_TIME_MS ((uint32_t)200)     // Debounce time in milliseconds
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
