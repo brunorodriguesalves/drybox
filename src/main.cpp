@@ -5,7 +5,7 @@
 #include <Wire.h>
 #include <math.h>
 
-#define TIMER_SECAGEM_PLA_S ((uint32_t)14400) // 4 horas
+#define TIMER_SECAGEM_PLA_S ((uint32_t)14460) // 4 horas
 #define TIMER_SECAGEM_PETG_S ((uint32_t)7200) // 2 horas
 #define TIMER_SECAGEM_ABS_S ((uint32_t)7200) // 2 horas
 #define TIMER_SECAGEM_TPU_S ((uint32_t)14400) // 4 horas
@@ -17,7 +17,7 @@ LiquidCrystal_I2C lcd(0x27, 20, 4);
 // --- Caracteres especiais ---
 
 // --- Desenho do termômetro ---
-byte A10Char[] = {
+byte A8Char[] = {
    B00100,
    B01010,
    B01010,
@@ -223,6 +223,7 @@ void get_new_state(PRESSED_BUTTON button) {
     }
 
     else {
+      timer = TIMER_SECAGEM_PETG_S;
       menu = MODE_PETG;
     }
     break;
@@ -260,6 +261,7 @@ void get_new_state(PRESSED_BUTTON button) {
     } else if (button == BOTAO_UP || button == BOTAO_VOLTAR) {
       menu = MODE_CANCELAR_ABS;
     } else {
+      timer = TIMER_SECAGEM_ABS_S;
       menu = MODE_ABS;
     }
     break;
@@ -301,6 +303,7 @@ void get_new_state(PRESSED_BUTTON button) {
     }
 
     else {
+      timer = TIMER_SECAGEM_TPU_S;
       menu = MODE_TPU;
     }
     break;
@@ -422,10 +425,10 @@ void updateMenu() {
     lcd.setCursor(7, 1);
     lcd.write(B11011111); // Imprime o símbolo de grau
     lcd.setCursor(8, 1);
-    lcd.print("      ");
-    lcd.createChar(10, A10Char); // Imprime o termômetro
+    lcd.print("     ");
+    lcd.createChar(1, A8Char); // Imprime o termômetro
     lcd.setCursor(13,1);
-    lcd.write((byte)10);
+    lcd.write((byte)1);
     lcd.setCursor(14, 1);
     lcd.print(t, 1);
     lcd.setCursor(18, 1);
@@ -487,10 +490,10 @@ void updateMenu() {
     lcd.setCursor(7, 1);
     lcd.write(B11011111); // Imprime o símbolo de grau
     lcd.setCursor(8, 1);
-    lcd.print("      ");
-    lcd.createChar(10, A10Char); // Imprime o termômetro
+    lcd.print("     ");
+    lcd.createChar(1, A8Char); // Imprime o termômetro
     lcd.setCursor(13,1);
-    lcd.write((byte)10);
+    lcd.write((byte)1);
     lcd.setCursor(14, 1);
     lcd.print(t, 1);
     lcd.setCursor(18, 1);
@@ -510,7 +513,7 @@ void updateMenu() {
    	lcd.setCursor(1,3);
    	lcd.write((byte)0);
     lcd.print(timer / 60);
-    lcd.setCursor(13, 3);
+    lcd.setCursor(12, 3);
     lcd.print(">Cancel ");
     break;
 
@@ -519,19 +522,34 @@ void updateMenu() {
   case MODE_PETG:
     lcd.setCursor(0, 0);
     lcd.print("   FILAMENTO PETG   ");
-    lcd.setCursor(0, 1);
+    lcd.setCursor(1, 1);
     lcd.print("Set:65");
     lcd.setCursor(7, 1);
-    lcd.print("  Atual:");
-    lcd.print(t, 1);
-    lcd.setCursor(19, 1);
     lcd.write(B11011111); // Imprime o símbolo de grau
-    lcd.setCursor(0, 2);
-    lcd.print("Umidade: ");
+    lcd.setCursor(8, 1);
+    lcd.print("     ");
+    lcd.createChar(1, A8Char); // Imprime o termômetro
+    lcd.setCursor(13,1);
+    lcd.write((byte)1);
+    lcd.setCursor(14, 1);
+    lcd.print(t, 1);
+    lcd.setCursor(18, 1);
+    lcd.write(B11011111); // Imprime o símbolo de grau
+    lcd.createChar(3, A30Char); // Imprime a gota d'água
+   	lcd.setCursor(1,2);
+   	lcd.write((byte)3);
+    lcd.setCursor(2, 2);
     lcd.print(h, 1);
-    lcd.print("%     ");
+    lcd.print("g/m");
+    lcd.createChar(4, A40Char); // Imprime o 3 cúbico
+    lcd.setCursor(9,2);
+    lcd.write((byte)4);
     lcd.setCursor(0, 3);
-    lcd.print("tempo");
+    lcd.print(" ");
+    lcd.createChar(0, A20Char ); // Imprime o relógio
+   	lcd.setCursor(1,3);
+   	lcd.write((byte)0);
+    lcd.print(timer / 60);
     lcd.setCursor(13, 3);
     lcd.print("Cancel ");
     break;
@@ -568,19 +586,34 @@ void updateMenu() {
   case MODE_PARAR_PETG:
     lcd.setCursor(0, 0);
     lcd.print("   FILAMENTO PETG   ");
-    lcd.setCursor(0, 1);
+    lcd.setCursor(1, 1);
     lcd.print("Set:65");
-    lcd.setCursor(9, 1);
-    lcd.print("Atual:");
-    lcd.print(t, 1);
-    lcd.setCursor(19, 1);
+    lcd.setCursor(7, 1);
     lcd.write(B11011111); // Imprime o símbolo de grau
-    lcd.setCursor(0, 2);
-    lcd.print("Umidade: ");
+    lcd.setCursor(8, 1);
+    lcd.print("     ");
+    lcd.createChar(1, A8Char); // Imprime o termômetro
+    lcd.setCursor(13,1);
+    lcd.write((byte)1);
+    lcd.setCursor(14, 1);
+    lcd.print(t, 1);
+    lcd.setCursor(18, 1);
+    lcd.write(B11011111); // Imprime o símbolo de grau
+    lcd.createChar(3, A30Char); // Imprime a gota d'água
+   	lcd.setCursor(1,2);
+   	lcd.write((byte)3);
+    lcd.setCursor(2, 2);
     lcd.print(h, 1);
-    lcd.print("%     ");
+    lcd.print("g/m");
+    lcd.createChar(4, A40Char); // Imprime o 3 cúbico
+    lcd.setCursor(9,2);
+    lcd.write((byte)4);
     lcd.setCursor(0, 3);
-    lcd.print("tempo");
+    lcd.print(" ");
+    lcd.createChar(0, A20Char ); // Imprime o relógio
+   	lcd.setCursor(1,3);
+   	lcd.write((byte)0);
+    lcd.print(timer / 60);
     lcd.setCursor(12, 3);
     lcd.print(">Cancel ");
     break;
@@ -590,19 +623,34 @@ void updateMenu() {
   case MODE_ABS:
     lcd.setCursor(0, 0);
     lcd.print("   FILAMENTO  ABS   ");
-    lcd.setCursor(0, 1);
+    lcd.setCursor(1, 1);
     lcd.print("Set:65");
-    lcd.setCursor(9, 1);
-    lcd.print("Atual:");
-    lcd.print(t, 1);
-    lcd.setCursor(19, 1);
+    lcd.setCursor(7, 1);
     lcd.write(B11011111); // Imprime o símbolo de grau
-    lcd.setCursor(0, 2);
-    lcd.print("Umidade: ");
+    lcd.setCursor(8, 1);
+    lcd.print("     ");
+    lcd.createChar(1, A8Char); // Imprime o termômetro
+    lcd.setCursor(13,1);
+    lcd.write((byte)1);
+    lcd.setCursor(14, 1);
+    lcd.print(t, 1);
+    lcd.setCursor(18, 1);
+    lcd.write(B11011111); // Imprime o símbolo de grau
+    lcd.createChar(3, A30Char); // Imprime a gota d'água
+   	lcd.setCursor(1,2);
+   	lcd.write((byte)3);
+    lcd.setCursor(2, 2);
     lcd.print(h, 1);
-    lcd.print("%     ");
+    lcd.print("g/m");
+    lcd.createChar(4, A40Char); // Imprime o 3 cúbico
+    lcd.setCursor(9,2);
+    lcd.write((byte)4);
     lcd.setCursor(0, 3);
-    lcd.print("tempo");
+    lcd.print(" ");
+    lcd.createChar(0, A20Char ); // Imprime o relógio
+   	lcd.setCursor(1,3);
+   	lcd.write((byte)0);
+    lcd.print(timer / 60);
     lcd.setCursor(13, 3);
     lcd.print("Cancel ");
     break;
@@ -639,19 +687,34 @@ void updateMenu() {
   case MODE_PARAR_ABS:
     lcd.setCursor(0, 0);
     lcd.print("   FILAMENTO  ABS   ");
-    lcd.setCursor(0, 1);
+    lcd.setCursor(1, 1);
     lcd.print("Set:65");
-    lcd.setCursor(9, 1);
-    lcd.print("Atual:");
-    lcd.print(t, 1);
-    lcd.setCursor(19, 1);
+    lcd.setCursor(7, 1);
     lcd.write(B11011111); // Imprime o símbolo de grau
-    lcd.setCursor(0, 2);
-    lcd.print("Umidade: ");
+    lcd.setCursor(8, 1);
+    lcd.print("     ");
+    lcd.createChar(1, A8Char); // Imprime o termômetro
+    lcd.setCursor(13,1);
+    lcd.write((byte)1);
+    lcd.setCursor(14, 1);
+    lcd.print(t, 1);
+    lcd.setCursor(18, 1);
+    lcd.write(B11011111); // Imprime o símbolo de grau
+    lcd.createChar(3, A30Char); // Imprime a gota d'água
+   	lcd.setCursor(1,2);
+   	lcd.write((byte)3);
+    lcd.setCursor(2, 2);
     lcd.print(h, 1);
-    lcd.print("%     ");
+    lcd.print("g/m");
+    lcd.createChar(4, A40Char); // Imprime o 3 cúbico
+    lcd.setCursor(9,2);
+    lcd.write((byte)4);
     lcd.setCursor(0, 3);
-    lcd.print("tempo");
+    lcd.print(" ");
+    lcd.createChar(0, A20Char ); // Imprime o relógio
+   	lcd.setCursor(1,3);
+   	lcd.write((byte)0);
+    lcd.print(timer / 60);
     lcd.setCursor(12, 3);
     lcd.print(">Cancel ");
     break;
@@ -661,19 +724,34 @@ void updateMenu() {
   case MODE_TPU:
     lcd.setCursor(0, 0);
     lcd.print("   FILAMENTO  TPU   ");
-    lcd.setCursor(0, 1);
+    lcd.setCursor(1, 1);
     lcd.print("Set:55");
-    lcd.setCursor(9, 1);
-    lcd.print("Atual:");
-    lcd.print(t, 1);
-    lcd.setCursor(19, 1);
+    lcd.setCursor(7, 1);
     lcd.write(B11011111); // Imprime o símbolo de grau
-    lcd.setCursor(0, 2);
-    lcd.print("Umidade: ");
+    lcd.setCursor(8, 1);
+    lcd.print("     ");
+    lcd.createChar(1, A8Char); // Imprime o termômetro
+    lcd.setCursor(13,1);
+    lcd.write((byte)1);
+    lcd.setCursor(14, 1);
+    lcd.print(t, 1);
+    lcd.setCursor(18, 1);
+    lcd.write(B11011111); // Imprime o símbolo de grau
+    lcd.createChar(3, A30Char); // Imprime a gota d'água
+   	lcd.setCursor(1,2);
+   	lcd.write((byte)3);
+    lcd.setCursor(2, 2);
     lcd.print(h, 1);
-    lcd.print("%     ");
+    lcd.print("g/m");
+    lcd.createChar(4, A40Char); // Imprime o 3 cúbico
+    lcd.setCursor(9,2);
+    lcd.write((byte)4);
     lcd.setCursor(0, 3);
-    lcd.print("tempo");
+    lcd.print(" ");
+    lcd.createChar(0, A20Char ); // Imprime o relógio
+   	lcd.setCursor(1,3);
+   	lcd.write((byte)0);
+    lcd.print(timer / 60);
     lcd.setCursor(13, 3);
     lcd.print("Cancel ");
     break;
@@ -710,19 +788,34 @@ void updateMenu() {
   case MODE_PARAR_TPU:
     lcd.setCursor(0, 0);
     lcd.print("   FILAMENTO  TPU   ");
-    lcd.setCursor(0, 1);
+    lcd.setCursor(1, 1);
     lcd.print("Set:55");
-    lcd.setCursor(9, 1);
-    lcd.print("Atual:");
-    lcd.print(t, 1);
-    lcd.setCursor(19, 1);
+    lcd.setCursor(7, 1);
     lcd.write(B11011111); // Imprime o símbolo de grau
-    lcd.setCursor(0, 2);
-    lcd.print("Umidade: ");
+    lcd.setCursor(8, 1);
+    lcd.print("     ");
+    lcd.createChar(1, A8Char); // Imprime o termômetro
+    lcd.setCursor(13,1);
+    lcd.write((byte)1);
+    lcd.setCursor(14, 1);
+    lcd.print(t, 1);
+    lcd.setCursor(18, 1);
+    lcd.write(B11011111); // Imprime o símbolo de grau
+    lcd.createChar(3, A30Char); // Imprime a gota d'água
+   	lcd.setCursor(1,2);
+   	lcd.write((byte)3);
+    lcd.setCursor(2, 2);
     lcd.print(h, 1);
-    lcd.print("%     ");
+    lcd.print("g/m");
+    lcd.createChar(4, A40Char); // Imprime o 3 cúbico
+    lcd.setCursor(9,2);
+    lcd.write((byte)4);
     lcd.setCursor(0, 3);
-    lcd.print("tempo");
+    lcd.print(" ");
+    lcd.createChar(0, A20Char ); // Imprime o relógio
+   	lcd.setCursor(1,3);
+   	lcd.write((byte)0);
+    lcd.print(timer / 60);
     lcd.setCursor(12, 3);
     lcd.print(">Cancel ");
     break;
