@@ -865,6 +865,11 @@ void loop() {
     millis_countdown_timer = current_millis;
   }
   if (timer > 0 && current_millis - millis_countdown_timer > 1000) {
+    Serial.print("Estado: ");
+    Serial.println(menu);
+    Serial.print("Timer segundos:");
+    Serial.println(timer);
+
     // adiciona os estados aqui para os outros materiais
     if (menu == MODE_PLA) {
       timer--;
@@ -874,6 +879,8 @@ void loop() {
         menu = MODE_SELECT_PLA;
       }
       update_menu_timer = true;
+    } else if (MODE_CANCELAR_PLA) {
+      // n faz nada por enquanto
     } else {
       timer = 0;
     }
@@ -901,6 +908,12 @@ void checkButtons() {
   bool selecionarState = !digitalRead(botaoSelecionar);
 
   if ((upState || downState || voltarState || selecionarState)) {
+    Serial.print("Botao Acionado: ");
+    Serial.print(upState);
+    Serial.print(downState);
+    Serial.print(voltarState);
+    Serial.print(selecionarState);
+
     if (upState &&
         (current_millis - lastDebounceTime[BOTAO_UP]) > DEBOUNCE_TIME_MS) {
       get_new_state(BOTAO_UP);
