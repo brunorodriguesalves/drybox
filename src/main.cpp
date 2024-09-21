@@ -1,3 +1,7 @@
+// Considerar os pinos D2 e D3 para interrupção externa de pulso para o encoder (altera os pinos dos botões)
+// Considerar o pino D11 para o BLOCO AQUECEDOR
+// Considerar o pino D10 para O FAN
+
 #include <Arduino.h>
 #include <DHT.h>
 #include <DHT_U.h>
@@ -73,6 +77,8 @@ uint32_t millis_leitura_sensores = 0;
 uint32_t millis_countdown_timer = 0;
 uint32_t timer = 0;
 
+bool update_menu_timer = false;
+
 float h;
 float t;
 float prev_h;
@@ -128,6 +134,41 @@ typedef enum {
 } MENU_STATE;
 
 MENU_STATE menu = INITIALIZATION;
+
+void controlatimerestado(){
+  switch (menu) {
+    case MODE_SELECT_PLA:
+    case MODE_SELECT_PETG:
+    case MODE_SELECT_ABS:
+    case MODE_SELECT_TPU:
+      timer = 0;
+      break;
+    case MODE_PARAR_PLA:
+    case MODE_PARAR_PETG:
+    case MODE_PARAR_ABS:
+    case MODE_PARAR_TPU:
+    case MODE_PLA:
+    case MODE_PETG:
+    case MODE_ABS:
+    case MODE_TPU:
+      timer--;
+      if (timer == 0) {
+        menu = MODE_SELECT_PLA;
+        // possibilidade de adicionar o buzzer
+      }
+      update_menu_timer = true;
+      break;
+    case MODE_CANCELAR_PLA:
+    case MODE_CANCELAR_PETG:
+    case MODE_CANCELAR_ABS:
+    case MODE_CANCELAR_TPU:
+      // faz nada por enquanto
+      break;
+    default:
+      timer = 0;
+      break;
+    }
+}
 
 // ---Lógica para navegação dos menus principais ---
 void get_new_state(PRESSED_BUTTON button) {
@@ -823,6 +864,7 @@ void updateMenu() {
 }
 
 void setup() {
+  Serial.begin(9600);
   lcd.init();
   lcd.backlight();
   dht.begin();
@@ -841,7 +883,7 @@ void setup() {
 void loop() {
   current_millis = millis();
   bool update_menu_sensor = false;
-  bool update_menu_timer = false;
+  update_menu_timer = false;
 
   // le os sensores a cada 2 segundos, se variou 0.1 deve atualizar o display
   if (current_millis - millis_leitura_sensores > 2000) {
@@ -864,26 +906,14 @@ void loop() {
     // aconteceu um overflow
     millis_countdown_timer = current_millis;
   }
-  if (timer > 0 && current_millis - millis_countdown_timer > 1000) {
+  if (current_millis - millis_countdown_timer > 1000) {
     Serial.print("Estado: ");
     Serial.println(menu);
     Serial.print("Timer segundos:");
     Serial.println(timer);
 
-    // adiciona os estados aqui para os outros materiais
-    if (menu == MODE_PLA) {
-      timer--;
-      if (timer == 0) {
-        // acabou o tempo de secagem
-        // TODO coloca os outputs esperados aqui bruno
-        menu = MODE_SELECT_PLA;
-      }
-      update_menu_timer = true;
-    } else if (MODE_CANCELAR_PLA) {
-      // n faz nada por enquanto
-    } else {
-      timer = 0;
-    }
+    controlatimerestado();
+
     millis_countdown_timer = current_millis;
   }
 
@@ -912,7 +942,7 @@ void checkButtons() {
     Serial.print(upState);
     Serial.print(downState);
     Serial.print(voltarState);
-    Serial.print(selecionarState);
+    Serial.println(selecionarState);
 
     if (upState &&
         (current_millis - lastDebounceTime[BOTAO_UP]) > DEBOUNCE_TIME_MS) {
