@@ -1,6 +1,6 @@
-// Considerar os pinos D2 e D3 para interrupção externa de pulso para o encoder
-// (altera os pinos dos botões) Considerar o pino D11 para o BLOCO AQUECEDOR
-// Considerar o pino D10 para O FAN
+// Considerar os pinos D2 e D3 para interrupção externa de pulso para o encoder (PENDENTE)
+// Considerar o pino D10 para FAN (JÁ DECLARADO NA LINHA 66)
+// (altera os pinos dos botões) Considerar o pino D11 para BLOCO AQUECEDOR (JÁ DECALARADO NA LINHA 67)
 
 #include <Arduino.h>
 #include <DHT.h>
@@ -10,7 +10,7 @@
 #include <Wire.h>
 #include <math.h>
 
-#define TIMER_SECAGEM_PLA_S ((uint32_t)14460) // 4 horas
+#define TIMER_SECAGEM_PLA_S ((uint32_t)14459) // 4 horas
 #define TIMER_SECAGEM_PETG_S ((uint32_t)7200) // 2 horas
 #define TIMER_SECAGEM_ABS_S ((uint32_t)7200)  // 2 horas
 #define TIMER_SECAGEM_TPU_S ((uint32_t)14400) // 4 horas
@@ -63,7 +63,8 @@ void checkButtons();
 void clean_display();
 
 #define RELE_AUTO 13
-#define RELE_A 9
+#define FAN 10
+#define BLOCO_AQUECEDOR 11
 int STATUS_RELE_A = 0;
 
 int botaoUp = 2;
@@ -849,9 +850,9 @@ void setup() {
   pinMode(botaoDown, INPUT_PULLUP);
   pinMode(botaoVoltar, INPUT_PULLUP);
   pinMode(botaoSelecionar, INPUT_PULLUP);
-  pinMode(RELE_A, OUTPUT);
+  pinMode(FAN, OUTPUT);
   pinMode(RELE_AUTO, OUTPUT);
-  pinMode(D11, OUTPUT);
+  pinMode(BLOCO_AQUECEDOR, OUTPUT);
   delay(1000);
   menu = MODE_SELECT_PLA;
   updateMenu();
@@ -884,9 +885,9 @@ void loop() {
     prev_h = h;
     prev_t = t;
 
-    input = t;
+    Input = t;
     myPID.Compute();
-    analogWrite(D11, Output);
+    analogWrite(BLOCO_AQUECEDOR, Output);
 
     millis_leitura_sensores = current_millis;
   }
