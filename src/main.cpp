@@ -1,6 +1,7 @@
-// Considerar os pinos D2 e D3 para interrupção externa de pulso para o encoder (PENDENTE)
-// Considerar o pino D10 para FAN (JÁ DECLARADO NA LINHA 66)
-// (altera os pinos dos botões) Considerar o pino D11 para BLOCO AQUECEDOR (JÁ DECALARADO NA LINHA 67)
+// Considerar os pinos D2 e D3 para interrupção externa de pulso para o encoder
+// (PENDENTE) Considerar o pino D10 para FAN (JÁ DECLARADO NA LINHA 66) (altera
+// os pinos dos botões) Considerar o pino D11 para BLOCO AQUECEDOR (JÁ
+// DECALARADO NA LINHA 67)
 
 #include <Arduino.h>
 #include <DHT.h>
@@ -887,6 +888,12 @@ void loop() {
 
     Input = t;
     myPID.Compute();
+
+    Serial.print("Input:");
+    Serial.print(Input);
+    Serial.print(",");
+    Serial.print("Output:");
+    Serial.println(Output);
     analogWrite(BLOCO_AQUECEDOR, Output);
 
     millis_leitura_sensores = current_millis;
