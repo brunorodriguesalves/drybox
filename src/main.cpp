@@ -895,8 +895,10 @@ void loop() {
     Serial.println(Output);
     analogWrite(BLOCO_AQUECEDOR, Output);
 
-    if(Input > Setpoint){
+    if (Input > Setpoint) {
       digitalWrite(FAN, HIGH);
+    } else {
+      analogWrite(FAN, 127);
     }
 
     millis_leitura_sensores = current_millis;
