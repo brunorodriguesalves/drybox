@@ -895,10 +895,12 @@ void loop() {
     Serial.println(Output);
     analogWrite(BLOCO_AQUECEDOR, Output);
 
-    if (Input > Setpoint) {
+    if (Input >= Setpoint) {
       digitalWrite(FAN, HIGH);
-    } else {
-      analogWrite(FAN, 127);
+    } else if (Input >= Setpoint * 0.7) {
+      analogWrite(FAN, 204);
+    } else { // if(Input >= Setpoint * 0.5){
+      analogWrite(FAN, 153);
     }
 
     millis_leitura_sensores = current_millis;
@@ -940,10 +942,10 @@ void checkButtons() {
 
   if ((upState || downState || voltarState || selecionarState)) {
     // Serial.print("Botao Acionado: ");
-    Serial.print(upState);
-    Serial.print(downState);
-    Serial.print(voltarState);
-    Serial.println(selecionarState);
+    // Serial.print(upState);
+    // Serial.print(downState);
+    // Serial.print(voltarState);
+    // Serial.println(selecionarState);
 
     if (upState &&
         (current_millis - lastDebounceTime[BOTAO_UP]) > DEBOUNCE_TIME_MS) {
