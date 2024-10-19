@@ -18,6 +18,9 @@
 #define DEBOUNCE_TIME_MS ((uint32_t)200)      // Debounce time in milliseconds
 
 #define PID_SETPOINT_TEMPERATURA_PLA ((uint32_t)50)
+#define PID_SETPOINT_TEMPERATURA_PETG ((uint32_t)50)
+#define PID_SETPOINT_TEMPERATURA_ABS ((uint32_t)50)
+#define PID_SETPOINT_TEMPERATURA_TPU ((uint32_t)50)
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
@@ -132,7 +135,13 @@ void controlatimerestado() {
     timer--;
     if (timer == 0) {
       menu = MODE_SELECT_PLA;
-      // possibilidade de adicionar o buzzer
+      digitalWrite(RELE_AUTO,HIGH);
+      delay(1000);
+      digitalWrite(RELE_AUTO,LOW);
+      delay(1000);
+      digitalWrite(RELE_AUTO,HIGH);
+      delay(1000);
+      digitalWrite(RELE_AUTO,LOW);
     }
     update_menu_timer = true;
     break;
@@ -206,6 +215,7 @@ void get_new_state(PRESSED_BUTTON button) {
       menu = MODE_CANCELAR_PLA;
     } else {
       timer = TIMER_SECAGEM_PLA_S;
+      Setpoint = PID_SETPOINT_TEMPERATURA_PLA;
       menu = MODE_PLA;
     }
     break;
@@ -243,6 +253,7 @@ void get_new_state(PRESSED_BUTTON button) {
 
     else {
       timer = TIMER_SECAGEM_PETG_S;
+      Setpoint = PID_SETPOINT_TEMPERATURA_PETG;
       menu = MODE_PETG;
     }
     break;
@@ -281,6 +292,7 @@ void get_new_state(PRESSED_BUTTON button) {
       menu = MODE_CANCELAR_ABS;
     } else {
       timer = TIMER_SECAGEM_ABS_S;
+      Setpoint = PID_SETPOINT_TEMPERATURA_ABS;
       menu = MODE_ABS;
     }
     break;
@@ -323,6 +335,7 @@ void get_new_state(PRESSED_BUTTON button) {
 
     else {
       timer = TIMER_SECAGEM_TPU_S;
+      Setpoint = PID_SETPOINT_TEMPERATURA_TPU;
       menu = MODE_TPU;
     }
     break;
