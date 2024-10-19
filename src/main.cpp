@@ -894,7 +894,7 @@ void loop() {
     Serial.print("Output:");
     Serial.println(Output);
     analogWrite(BLOCO_AQUECEDOR, Output);
-    
+
     if(Input > Setpoint){
       digitalWrite(FAN, HIGH);
     }
@@ -906,10 +906,10 @@ void loop() {
     millis_countdown_timer = current_millis;
   }
   if (current_millis - millis_countdown_timer > 1000) {
-    Serial.print("Estado: ");
-    Serial.println(menu);
-    Serial.print("Timer segundos ");
-    Serial.println(timer);
+    // Serial.print("Estado: ");
+    // Serial.println(menu);
+    // Serial.print("Timer segundos ");
+    // Serial.println(timer);
 
     controlatimerestado();
 
@@ -937,7 +937,7 @@ void checkButtons() {
   bool selecionarState = !digitalRead(botaoSelecionar);
 
   if ((upState || downState || voltarState || selecionarState)) {
-    Serial.print("Botao Acionado: ");
+    // Serial.print("Botao Acionado: ");
     Serial.print(upState);
     Serial.print(downState);
     Serial.print(voltarState);
