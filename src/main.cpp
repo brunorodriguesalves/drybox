@@ -886,21 +886,26 @@ void loop() {
     prev_h = h;
     prev_t = t;
 
-    Input = t;
-    myPID.Compute();
-    Serial.print("Input:");
-    Serial.print(Input);
-    Serial.print(",");
-    Serial.print("Output:");
-    Serial.println(Output);
-    analogWrite(BLOCO_AQUECEDOR, Output);
+    if (timer > 0) {
+      Input = t;
+      myPID.Compute();
+      Serial.print("Input:");
+      Serial.print(Input);
+      Serial.print(",");
+      Serial.print("Output:");
+      Serial.println(Output);
+      analogWrite(BLOCO_AQUECEDOR, Output);
 
-    if (Input >= Setpoint) {
-      digitalWrite(FAN, HIGH);
-    } else if (Input >= Setpoint * 0.7) {
-      analogWrite(FAN, 204);
-    } else { // if(Input >= Setpoint * 0.5){
-      analogWrite(FAN, 153);
+      if (Input >= Setpoint) {
+        digitalWrite(FAN, HIGH);
+      } else if (Input >= Setpoint * 0.7) {
+        analogWrite(FAN, 204);
+      } else { // if(Input >= Setpoint * 0.5){
+        analogWrite(FAN, 153);
+      }
+    } else {
+      analogWrite(FAN, 0);
+      analogWrite(BLOCO_AQUECEDOR, 0);
     }
 
     millis_leitura_sensores = current_millis;
