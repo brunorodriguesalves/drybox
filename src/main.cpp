@@ -888,13 +888,16 @@ void loop() {
 
     Input = t;
     myPID.Compute();
-
     Serial.print("Input:");
     Serial.print(Input);
     Serial.print(",");
     Serial.print("Output:");
     Serial.println(Output);
     analogWrite(BLOCO_AQUECEDOR, Output);
+    
+    if(Input > Setpoint){
+      digitalWrite(FAN, HIGH);
+    }
 
     millis_leitura_sensores = current_millis;
   }
@@ -905,7 +908,7 @@ void loop() {
   if (current_millis - millis_countdown_timer > 1000) {
     Serial.print("Estado: ");
     Serial.println(menu);
-    Serial.print("Timer segundos:");
+    Serial.print("Timer segundos ");
     Serial.println(timer);
 
     controlatimerestado();
