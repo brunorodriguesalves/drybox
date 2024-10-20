@@ -12,15 +12,15 @@
 #include <math.h>
 
 #define TIMER_SECAGEM_PLA_S ((uint32_t)14459) // 4 horas
-#define TIMER_SECAGEM_PETG_S ((uint32_t)7200) // 2 horas
-#define TIMER_SECAGEM_ABS_S ((uint32_t)7200)  // 2 horas
-#define TIMER_SECAGEM_TPU_S ((uint32_t)14400) // 4 horas
+#define TIMER_SECAGEM_PETG_S ((uint32_t)7259) // 2 horas
+#define TIMER_SECAGEM_ABS_S ((uint32_t)7259)  // 2 horas
+#define TIMER_SECAGEM_TPU_S ((uint32_t)14459) // 4 horas
 #define DEBOUNCE_TIME_MS ((uint32_t)200)      // Debounce time in milliseconds
 
 #define PID_SETPOINT_TEMPERATURA_PLA ((uint32_t)50)
-#define PID_SETPOINT_TEMPERATURA_PETG ((uint32_t)50)
-#define PID_SETPOINT_TEMPERATURA_ABS ((uint32_t)50)
-#define PID_SETPOINT_TEMPERATURA_TPU ((uint32_t)50)
+#define PID_SETPOINT_TEMPERATURA_PETG ((uint32_t)65)
+#define PID_SETPOINT_TEMPERATURA_ABS ((uint32_t)65)
+#define PID_SETPOINT_TEMPERATURA_TPU ((uint32_t)55)
 
 LiquidCrystal_I2C lcd(0x27, 20, 4);
 
@@ -113,7 +113,7 @@ MENU_STATE menu = INITIALIZATION;
 
 double Setpoint, Input, Output;
 
-PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, P_ON_M,
+PID myPID(&Input, &Output, &Setpoint, 20, 5, 1, P_ON_E,
           DIRECT); // P_ON_M specifies that Proportional on Measurement be used
 
 void controlatimerestado() {
@@ -482,7 +482,6 @@ void updateMenu() {
     lcd.print(timer / 60);
     lcd.setCursor(13, 3);
     lcd.print("Cancel ");
-    digitalWrite(RELE_AUTO, HIGH);
     break;
 
     // --- Tela CONFIRMAR/CANCELAR filamento PLA ---
