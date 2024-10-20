@@ -1,5 +1,5 @@
 // Considerar os pinos D2 e D3 para interrupção externa de pulso para o encoder
-// (PENDENTE) Considerar o pino D10 para FAN (JÁ DECLARADO NA LINHA 66) (altera
+// Considerar o pino D10 para FAN (JÁ DECLARADO NA LINHA 66) (altera
 // os pinos dos botões) Considerar o pino D11 para BLOCO AQUECEDOR (JÁ
 // DECALARADO NA LINHA 67)
 
@@ -113,7 +113,7 @@ MENU_STATE menu = INITIALIZATION;
 
 double Setpoint, Input, Output;
 
-PID myPID(&Input, &Output, &Setpoint, 20, 5, 1, P_ON_E,
+PID myPID(&Input, &Output, &Setpoint, 2, 5, 1, P_ON_M,
           DIRECT); // P_ON_M specifies that Proportional on Measurement be used
 
 void controlatimerestado() {
@@ -481,7 +481,8 @@ void updateMenu() {
     lcd.write((byte)0);
     lcd.print(timer / 60);
     lcd.setCursor(13, 3);
-    lcd.print("Cancel ");
+    lcd.print("Cancela");
+    digitalWrite(RELE_AUTO, HIGH);
     break;
 
     // --- Tela CONFIRMAR/CANCELAR filamento PLA ---
@@ -545,7 +546,7 @@ void updateMenu() {
     lcd.write((byte)0);
     lcd.print(timer / 60);
     lcd.setCursor(12, 3);
-    lcd.print(">Cancel ");
+    lcd.print(">Cancela");
     break;
 
     // -----------------------------------
@@ -646,7 +647,7 @@ void updateMenu() {
     lcd.write((byte)0);
     lcd.print(timer / 60);
     lcd.setCursor(12, 3);
-    lcd.print(">Cancel ");
+    lcd.print(">Cancela");
     break;
 
     // ----------------------------------
@@ -683,7 +684,7 @@ void updateMenu() {
     lcd.write((byte)0);
     lcd.print(timer / 60);
     lcd.setCursor(13, 3);
-    lcd.print("Cancel ");
+    lcd.print("Cancela");
     break;
 
     // --- Tela CONFIRMAR/CANCELAR filamento ABS ---
@@ -747,7 +748,7 @@ void updateMenu() {
     lcd.write((byte)0);
     lcd.print(timer / 60);
     lcd.setCursor(12, 3);
-    lcd.print(">Cancel ");
+    lcd.print(">Cancela");
     break;
 
     // ----------------------------------
@@ -784,7 +785,7 @@ void updateMenu() {
     lcd.write((byte)0);
     lcd.print(timer / 60);
     lcd.setCursor(13, 3);
-    lcd.print("Cancel ");
+    lcd.print("Cancela");
     break;
 
     // --- Tela CONFIRMAR/CANCELAR filamento TPU ---
@@ -848,7 +849,7 @@ void updateMenu() {
     lcd.write((byte)0);
     lcd.print(timer / 60);
     lcd.setCursor(12, 3);
-    lcd.print(">Cancel ");
+    lcd.print(">Cancela");
     break;
   }
 }
@@ -909,11 +910,15 @@ void loop() {
       analogWrite(BLOCO_AQUECEDOR, Output);
 
       if (Input >= Setpoint) {
-        digitalWrite(FAN, HIGH);
-      } else if (Input >= Setpoint * 0.7) {
-        analogWrite(FAN, 204);
-      } else { // if(Input >= Setpoint * 0.5){
         analogWrite(FAN, 153);
+      } else if (Input >= Setpoint * 0.9) {
+        analogWrite(FAN, 179);
+      } else if (Input >= Setpoint * 0.8) {
+        analogWrite(FAN, 204);
+      } else if (Input >= Setpoint * 0.7) {
+        analogWrite(FAN, 230);
+      } else if (Input >= Setpoint * 0.6) {
+        digitalWrite(FAN, HIGH);
       }
     } else {
       analogWrite(FAN, 0);
